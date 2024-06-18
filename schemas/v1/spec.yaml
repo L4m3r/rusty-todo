@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: TODO Service API
+  version: 1.0.0
+  description: API for task management with user authorization.
+servers:
+  - url: https://127.0.0.1/api/v1
+tags:
+  - name: tasks
+    description: Getting and managing tasks
+  - name: user
+    description: User authorization and registration
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        completed:
+          type: boolean
+        user_id:
+          type: string
+          format: uuid
+  responses:
+    UnauthorizedError:
+      description: Unauthorized user
+paths:
+  /auth/login:
+    post:
+      summary: Login user
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /auth/register:
+    post:
+      summary: User registration
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User successfully registered 
+        '400':
+          description: Validation error
+  /tasks:
+    get:
+      summary: Get all tasks
+      tags:
+        - tasks
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create new task
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                due_date:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Task successfully created
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /tasks/{taskId}:
+    get:
+      summary: Get task by ID
+      tags:
+        - tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Task does not found
+    put:
+      summary: Update task by ID
+      tags:
+        - tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [pending, in_progress, completed]
+                due_date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Task successfully updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Task does not found
+    delete:
+      summary: Delete task by ID
+      tags:
+        - tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Task does not found
+
