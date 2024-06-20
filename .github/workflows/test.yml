@@ -31,7 +31,7 @@ jobs:
         run:
             cargo install sqlx-cli
             --version=${{ env.SQLX_VERSION }}
-            --features ${{ env.SQLX_FEATURES }}
+            --features "rustls,postgres"
             --no-default-features
             --locked
       - name: Install postgresql-client
