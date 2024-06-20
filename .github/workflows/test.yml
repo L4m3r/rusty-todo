@@ -39,5 +39,7 @@ jobs:
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/setup_db.sh
       - name: Run tests
+        env:
+          DATABASE_URL: postgres://todo:password@localhost:5432/todo
         run: cargo test
 
